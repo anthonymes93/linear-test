@@ -2,8 +2,51 @@
 <html>
 <head>
   <title>Linear Test</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .vertical-nav {
+      position: fixed;
+      inset: 0 auto 0 0;
+      width: 160px;
+      background: #00ff3c;
+      padding: 24px 16px;
+      box-sizing: border-box;
+    }
+
+    .vertical-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #111;
+      font-weight: 700;
+      margin-bottom: 16px;
+      text-decoration: none;
+    }
+
+    .nav-icon {
+      color: #ffd400;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    main {
+      margin-left: 160px;
+      padding: 24px;
+    }
+  </style>
 </head>
 <body>
-  <button>Hello World</button>
+  <nav class="vertical-nav" aria-label="Main navigation">
+    <a href="#"><span class="nav-icon" aria-hidden="true">&#9733;</span>Home</a>
+    <a href="#"><span class="nav-icon" aria-hidden="true">&#9670;</span>About</a>
+    <a href="#"><span class="nav-icon" aria-hidden="true">&#9679;</span>Contact</a>
+  </nav>
+  <main>
+    <button>Hello World</button>
+  </main>
 </body>
 </html>
