@@ -35,6 +35,20 @@
       transition: background 160ms ease, color 160ms ease;
     }
 
+    main {
+      align-items: center;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      justify-content: center;
+    }
+
     button {
       background: var(--button-bg);
       border: 1px solid var(--button-border);
@@ -52,8 +66,13 @@
   </style>
 </head>
 <body>
-  <button>Hello World</button>
-  <button id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+  <main>
+    <div class="button-row" aria-label="Demo actions">
+      <button type="button">Hello World</button>
+      <button type="button">Second Button</button>
+    </div>
+    <button id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+  </main>
 
   <script>
     const toggle = document.getElementById('theme-toggle');
