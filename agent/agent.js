@@ -6,6 +6,10 @@ const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
 const TEAM_KEY = process.env.LINEAR_TEAM_KEY;
 const MAX_TASKS = Number(process.env.MAX_TASKS || 5);
 
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 function run(cmd, cwd = "..") {
   console.log(`\n> ${cmd}`);
   execSync(cmd, { stdio: "inherit", cwd, shell: "powershell.exe" });
@@ -36,8 +40,7 @@ async function getNextIssue() {
       issues(
         filter: {
           team: { key: { eq: "${TEAM_KEY}" } },
-          state: { name: { eq: "Todo" } }
-        },
+state: { type: { eq: "unstarted" } }        },
         first: 1
       ) {
         nodes { id identifier title description }
@@ -81,12 +84,12 @@ async function moveIssue(issueId, stateName) {
 }
 
 async function main() {
-  for (let i = 0; i < MAX_TASKS; i++) {
-    const issue = await getNextIssue();
+while (true) {    const issue = await getNextIssue();
 
     if (!issue) {
-      console.log("No Todo issues found.");
-      return;
+console.log("No Todo issues found. Waiting 30 seconds...");
+await sleep(30000);
+continue;
     }
 
     const branch = `itsme/${issue.identifier.toLowerCase()}-${slugify(issue.title)}`;
@@ -145,7 +148,16 @@ Rules:
   console.log(`Reached MAX_TASKS=${MAX_TASKS}.`);
 }
 
-main().catch((err) => {
-  console.error(err.message);
-  process.exit(1);
-});
+(async function runner() {
+  while (true) {
+    try {
+      await main();
+    } catch (err) {
+      console.error("AGENT ERROR:");
+      console.error(err.message);
+    }
+
+    console.log("Restarting loop in 15 seconds...");
+    await sleep(15000);
+  }
+})();
