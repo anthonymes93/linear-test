@@ -2,8 +2,67 @@
 <html>
 <head>
   <title>Linear Test</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --background: #f7f7f8;
+      --foreground: #1f2328;
+      --button-bg: #ffffff;
+      --button-border: #d0d7de;
+      --button-hover: #f0f2f4;
+    }
+
+    body.dark {
+      color-scheme: dark;
+      --background: #111318;
+      --foreground: #f0f3f6;
+      --button-bg: #1c2128;
+      --button-border: #3d444d;
+      --button-hover: #272e38;
+    }
+
+    body {
+      align-items: center;
+      background: var(--background);
+      color: var(--foreground);
+      display: flex;
+      flex-direction: column;
+      font-family: Arial, sans-serif;
+      gap: 16px;
+      justify-content: center;
+      margin: 0;
+      min-height: 100vh;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    button {
+      background: var(--button-bg);
+      border: 1px solid var(--button-border);
+      border-radius: 6px;
+      color: var(--foreground);
+      cursor: pointer;
+      font: inherit;
+      padding: 10px 16px;
+      transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+    }
+
+    button:hover {
+      background: var(--button-hover);
+    }
+  </style>
 </head>
 <body>
   <button>Hello World</button>
+  <button id="theme-toggle" type="button" aria-pressed="false">Dark mode</button>
+
+  <script>
+    const toggle = document.getElementById('theme-toggle');
+
+    toggle.addEventListener('click', () => {
+      const isDark = document.body.classList.toggle('dark');
+      toggle.textContent = isDark ? 'Light mode' : 'Dark mode';
+      toggle.setAttribute('aria-pressed', String(isDark));
+    });
+  </script>
 </body>
 </html>
