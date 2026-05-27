@@ -20,6 +20,11 @@
     h1 {
       color: blue;
     }
+
+    dialog {
+      border: 1px solid #777;
+      padding: 24px;
+    }
   </style>
 </head>
 <body>
@@ -27,5 +32,25 @@
   <h1>yesssssssssss</h1>
   <button>Hello World</button>
   <button>Hello Yo</button>
+  <button id="ok-button">okkkkkkkk</button>
+
+  <dialog id="ok-modal">
+    <p>lorium ipsum</p>
+    <button id="close-modal">Close</button>
+  </dialog>
+
+  <script>
+    const okButton = document.getElementById('ok-button');
+    const okModal = document.getElementById('ok-modal');
+    const closeModal = document.getElementById('close-modal');
+
+    okButton.addEventListener('click', () => {
+      okModal.showModal();
+    });
+
+    closeModal.addEventListener('click', () => {
+      okModal.close();
+    });
+  </script>
 </body>
 </html>
