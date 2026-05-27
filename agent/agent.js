@@ -54,7 +54,7 @@ async function getNextIssue() {
           team: { key: { eq: "${TEAM_KEY}" } },
           state: { type: { eq: "unstarted" } }
         },
-        orderBy: createdAt,
+        orderBy: number,
         first: 1
       ) {
         nodes {
