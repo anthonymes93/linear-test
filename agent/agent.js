@@ -149,8 +149,7 @@ Rules:
 
   const escapedPrompt = prompt.replace(/"/g, '\\"').replace(/\r?\n/g, " ");
 
-  run(`codex exec "${escapedPrompt}"`);
-
+run(`codex exec -- "${escapedPrompt}"`);
   const status = output("git status --short");
 
   if (!status) {
