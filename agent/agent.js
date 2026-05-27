@@ -147,10 +147,8 @@ Rules:
 - When finished, stop. Do not wait for more instructions.
 `;
 
-  const escapedPrompt = prompt.replace(/"/g, '\\"').replace(/\r?\n/g, " ");
-
-run(`codex exec -- "${escapedPrompt}"`);
-  const status = output("git status --short");
+const escapedPrompt = prompt.replace(/\r?\n/g, " ");
+run(`codex exec -- '${escapedPrompt}'`);  const status = output("git status --short");
 
   if (!status) {
     console.log("No file changes made. Moving issue back to Todo.");
