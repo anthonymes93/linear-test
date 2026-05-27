@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Archive, CalendarClock, CheckCircle2, CircleDot, Clock3, Inbox, Loader2, PauseCircle } from 'lucide-react';
+import { Archive, CalendarClock, CheckCircle2, CircleDot, Clock3, Inbox, Layers3, Loader2, PauseCircle } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import type { TaskStatus } from '../../types/task';
 import { WorkspaceSwitcher } from '../collaboration/WorkspaceSwitcher';
@@ -32,6 +32,18 @@ export function Sidebar() {
       </div>
 
       <nav className="space-y-1">
+        <NavLink
+          to="/planning/dashboard"
+          className={({ isActive }) =>
+            cn(
+              'flex h-10 items-center gap-3 rounded-lg px-3 text-sm transition',
+              isActive ? 'bg-white/10 text-white shadow-glow' : 'text-slate-400 hover:bg-white/[0.07] hover:text-slate-100',
+            )
+          }
+        >
+          <Layers3 className="h-4 w-4" />
+          Planning
+        </NavLink>
         {navItems.map((item) => (
           <NavLink
             key={item.path}

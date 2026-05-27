@@ -22,6 +22,7 @@ import type { NavigateFunction } from 'react-router-dom';
 import { isFirebaseConfigured } from './firebase';
 import { parseNaturalLanguageTask } from './naturalLanguageParser';
 import { useOverlayStore } from '../stores/overlayStore';
+import { usePlanningStore } from '../stores/planningStore';
 import { useTaskStore } from '../stores/taskStore';
 import { useUiStore } from '../stores/uiStore';
 import type { CommandDefinition } from '../types/command';
@@ -72,13 +73,28 @@ export function createCommandRegistry(navigate: NavigateFunction): CommandDefini
     {
       id: 'project.create',
       title: 'Create project',
-      subtitle: 'Start a workspace project',
+      subtitle: 'Start a planning project',
       group: 'Create',
       keywords: ['new', 'workspace'],
       icon: ClipboardList,
       perform: ({ query, close }) => {
-        const project = useTaskStore.getState().addProject(query || 'New project');
-        toast.success(`Created ${project.name}`);
+        const state = useTaskStore.getState();
+        const spaceId = usePlanningStore.getState().spaces[0]?.id ?? 'space-personal';
+        const project = usePlanningStore.getState().addProject({ workspaceId: state.selectedWorkspaceId, spaceId, title: query || 'New project' });
+        toast.success(`Created ${project.title}`);
+        close();
+      },
+    },
+    {
+      id: 'nav.planning',
+      title: 'Go to Planning',
+      subtitle: 'Open spaces, projects, and weekly planner',
+      group: 'Navigate',
+      nestedGroup: 'Sections',
+      keywords: ['planning', 'projects', 'spaces', 'week'],
+      icon: ClipboardList,
+      perform: ({ close }) => {
+        navigate('/planning/dashboard');
         close();
       },
     },
