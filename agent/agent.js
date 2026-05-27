@@ -1,7 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
-const fs = require("fs");
 const { execSync, execFileSync } = require("child_process");
+
 const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
 const TEAM_KEY = process.env.LINEAR_TEAM_KEY;
 
@@ -11,7 +11,6 @@ function sleep(ms) {
 
 function run(cmd, cwd = "..") {
   console.log(`\n> ${cmd}`);
-
   execSync(cmd, {
     stdio: "inherit",
     cwd,
@@ -110,6 +109,18 @@ async function moveIssue(issueId, stateName) {
   console.log(`Moved issue to ${stateName}`);
 }
 
+function getRelevantDirtyStatus() {
+  const dirty = output("git status --short");
+
+  return dirty
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .filter((line) => !line.includes("codex-prompt.txt"))
+    .join("\n")
+    .trim();
+}
+
 async function processOneIssue() {
   const issue = await getNextIssue();
 
@@ -126,7 +137,7 @@ async function processOneIssue() {
   run("git checkout main");
   run("git pull");
 
-  const dirtyBefore = output("git status --short");
+  const dirtyBefore = getRelevantDirtyStatus();
 
   if (dirtyBefore) {
     console.log("Dirty working tree detected before Codex:");
@@ -134,9 +145,7 @@ async function processOneIssue() {
     console.log("Moving issue back to Todo and waiting.");
 
     await moveIssue(issue.id, "Todo");
-
     await sleep(30000);
-
     return;
   }
 
@@ -158,31 +167,23 @@ Rules:
 - When finished, stop. Do not wait for more instructions.
 `;
 
-  fs.writeFileSync("../codex-prompt.txt", prompt, "utf8");
+  execFileSync("codex", ["exec", prompt], {
+    stdio: "inherit",
+    cwd: "..",
+    shell: false,
+  });
 
-execFileSync("codex", ["exec", prompt], {
-  stdio: "inherit",
-  cwd: "..",
-  shell: false,
-});
-  const status = output("git status --short");
+  const status = getRelevantDirtyStatus();
 
   if (!status) {
     console.log("No file changes made. Moving issue back to Todo.");
-
     await moveIssue(issue.id, "Todo");
-
     await sleep(30000);
-
     return;
   }
 
   run("git add .");
-
-  run(
-    `git commit -m "${issue.identifier} ${issue.title.replace(/"/g, "")}"`
-  );
-
+  run(`git commit -m "${issue.identifier} ${issue.title.replace(/"/g, "")}"`);
   run("git push");
 
   await moveIssue(issue.id, "Done");
@@ -197,9 +198,7 @@ execFileSync("codex", ["exec", prompt], {
     } catch (err) {
       console.error("AGENT ERROR:");
       console.error(err.message);
-
       console.log("Waiting 30 seconds before retry...");
-
       await sleep(30000);
     }
   }
