@@ -3,9 +3,48 @@
 <head>
   <title>Linear Test</title>
   <style>
+    :root {
+      --background: #fffef5;
+      --text: #2b2500;
+      --menu: #ffd400;
+      --heading: #8a6d00;
+      --control: #ffffff;
+      --control-border: #777;
+    }
+
+    [data-theme="light"] {
+      --background: #ffffff;
+      --text: #222222;
+      --menu: #eeeeee;
+      --heading: #333333;
+      --control: #ffffff;
+      --control-border: #777777;
+    }
+
+    [data-theme="dark"] {
+      --background: #181818;
+      --text: #f2f2f2;
+      --menu: #2d2d2d;
+      --heading: #ffffff;
+      --control: #252525;
+      --control-border: #888888;
+    }
+
+    [data-theme="pink"] {
+      --background: #fff2f8;
+      --text: #3a1024;
+      --menu: #ff8fc1;
+      --heading: #9b1b57;
+      --control: #ffffff;
+      --control-border: #c74f86;
+    }
+
     body {
       margin: 0;
       padding-left: 96px;
+      background: var(--background);
+      color: var(--text);
+      font-family: Arial, sans-serif;
     }
 
     .menu-bar {
@@ -14,21 +53,42 @@
       left: 0;
       width: 80px;
       height: 100vh;
-      background: #ffd400;
+      background: var(--menu);
+    }
+
+    .theme-switcher {
+      margin-top: 16px;
     }
 
     h1 {
-      color: #8a6d00;
+      color: var(--heading);
+    }
+
+    button,
+    select {
+      background: var(--control);
+      color: var(--text);
+      border: 1px solid var(--control-border);
+      padding: 6px 10px;
     }
 
     dialog {
-      border: 1px solid #777;
+      background: var(--background);
+      color: var(--text);
+      border: 1px solid var(--control-border);
       padding: 24px;
     }
   </style>
 </head>
-<body>
+<body data-theme="yellow">
   <nav class="menu-bar" aria-label="Main menu"></nav>
+  <label class="theme-switcher" for="theme-select">Theme</label>
+  <select id="theme-select">
+    <option value="light">Light mode</option>
+    <option value="dark">Dark mode</option>
+    <option value="yellow" selected>Yellow</option>
+    <option value="pink">Pink</option>
+  </select>
   <h1>yesssssssssss</h1>
   <button>Hello World</button>
   <button>Hello Yo</button>
@@ -43,6 +103,11 @@
     const okButton = document.getElementById('ok-button');
     const okModal = document.getElementById('ok-modal');
     const closeModal = document.getElementById('close-modal');
+    const themeSelect = document.getElementById('theme-select');
+
+    themeSelect.addEventListener('change', () => {
+      document.body.dataset.theme = themeSelect.value;
+    });
 
     okButton.addEventListener('click', () => {
       okModal.showModal();
