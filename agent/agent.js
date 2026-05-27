@@ -48,13 +48,16 @@ async function linear(query) {
 async function getNextIssue() {
   const data = await linear(`
     query {
-      issues(
-        filter: {
-          team: { key: { eq: "${TEAM_KEY}" } },
-          state: { type: { eq: "unstarted" } }
-        },
-        first: 1
-      ) {
+issues(
+  filter: {
+    team: { key: { eq: "${TEAM_KEY}" } },
+    state: { type: { eq: "unstarted" } }
+  },
+  orderBy: createdAt,
+  first: 1
+)
+
+    {
         nodes {
           id
           identifier
