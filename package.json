@@ -1,19 +1,29 @@
 {
-  "name": "linear-test",
+  "name": "brainflow",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "typecheck": "tsc --noEmit",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
+    "firebase": "latest",
+    "framer-motion": "latest",
+    "lucide-react": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-hot-toast": "latest",
+    "react-router-dom": "latest",
+    "zustand": "latest"
   },
   "devDependencies": {
+    "@tailwindcss/vite": "latest",
     "@vitejs/plugin-react": "latest",
+    "tailwindcss": "latest",
+    "typescript": "latest",
     "vite": "latest"
   }
 }
