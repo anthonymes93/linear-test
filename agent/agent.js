@@ -167,11 +167,10 @@ Rules:
 - When finished, stop. Do not wait for more instructions.
 `;
 
-  execFileSync("codex", ["exec", prompt], {
-    stdio: "inherit",
-    cwd: "..",
-    shell: false,
-  });
+execFileSync("cmd.exe", ["/c", "codex", "exec", prompt], {
+  stdio: "inherit",
+  cwd: "..",
+});
 
   const status = getRelevantDirtyStatus();
 
