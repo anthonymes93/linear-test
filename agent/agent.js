@@ -4,10 +4,9 @@ const { execSync } = require("child_process");
 
 const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
 const TEAM_KEY = process.env.LINEAR_TEAM_KEY;
-const MAX_TASKS = Number(process.env.MAX_TASKS || 5);
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function run(cmd, cwd = "..") {
@@ -16,21 +15,29 @@ function run(cmd, cwd = "..") {
 }
 
 function output(cmd, cwd = "..") {
-  return execSync(cmd, { cwd, encoding: "utf8", shell: "powershell.exe" }).trim();
-}
-
-function slugify(text) {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "").slice(0, 60);
+  return execSync(cmd, {
+    cwd,
+    encoding: "utf8",
+    shell: "powershell.exe",
+  }).trim();
 }
 
 async function linear(query) {
   const res = await axios.post(
     "https://api.linear.app/graphql",
     { query },
-    { headers: { Authorization: LINEAR_API_KEY, "Content-Type": "application/json" } }
+    {
+      headers: {
+        Authorization: LINEAR_API_KEY,
+        "Content-Type": "application/json",
+      },
+    }
   );
 
-  if (res.data.errors) throw new Error(JSON.stringify(res.data.errors, null, 2));
+  if (res.data.errors) {
+    throw new Error(JSON.stringify(res.data.errors, null, 2));
+  }
+
   return res.data.data;
 }
 
@@ -40,10 +47,16 @@ async function getNextIssue() {
       issues(
         filter: {
           team: { key: { eq: "${TEAM_KEY}" } },
-state: { type: { eq: "unstarted" } }        },
+          state: { type: { eq: "unstarted" } }
+        },
         first: 1
       ) {
-        nodes { id identifier title description }
+        nodes {
+          id
+          identifier
+          title
+          description
+        }
       }
     }
   `);
@@ -60,7 +73,10 @@ async function getStateId(name) {
           name: { eq: "${name}" }
         }
       ) {
-        nodes { id name }
+        nodes {
+          id
+          name
+        }
       }
     }
   `);
@@ -70,7 +86,10 @@ async function getStateId(name) {
 
 async function moveIssue(issueId, stateName) {
   const stateId = await getStateId(stateName);
-  if (!stateId) throw new Error(`Could not find Linear state: ${stateName}`);
+
+  if (!stateId) {
+    throw new Error(`Could not find Linear state: ${stateName}`);
+  }
 
   await linear(`
     mutation {
@@ -83,31 +102,34 @@ async function moveIssue(issueId, stateName) {
   console.log(`Moved issue to ${stateName}`);
 }
 
-async function main() {
-while (true) {    const issue = await getNextIssue();
+async function processOneIssue() {
+  const issue = await getNextIssue();
 
-    if (!issue) {
-console.log("No Todo issues found. Waiting 30 seconds...");
-await sleep(30000);
-continue;
-    }
+  if (!issue) {
+    console.log("No unstarted issues found. Waiting 30 seconds...");
+    await sleep(30000);
+    return;
+  }
 
-    const branch = `itsme/${issue.identifier.toLowerCase()}-${slugify(issue.title)}`;
+  console.log(`\nStarting ${issue.identifier}: ${issue.title}`);
 
-    console.log(`\nStarting ${issue.identifier}: ${issue.title}`);
+  await moveIssue(issue.id, "In Progress");
 
-    await moveIssue(issue.id, "In Progress");
+  run("git checkout main");
+  run("git pull");
 
-    run("git checkout main");
-    run("git pull");
+  const dirtyBefore = output("git status --short");
 
-    try {
-      run(`git checkout ${branch}`);
-    } catch {
-      run(`git checkout -b ${branch}`);
-    }
+  if (dirtyBefore) {
+    console.log("Dirty working tree detected before Codex:");
+    console.log(dirtyBefore);
+    console.log("Moving issue back to Todo and waiting.");
+    await moveIssue(issue.id, "Todo");
+    await sleep(30000);
+    return;
+  }
 
-    const prompt = `
+  const prompt = `
 Complete Linear issue ${issue.identifier}.
 
 Title:
@@ -120,44 +142,42 @@ Rules:
 - Work only on this issue.
 - Do not invent extra features.
 - Keep changes small and focused.
+- Modify the root app files, not the agent folder, unless the issue specifically asks for agent changes.
 - Verify the change if possible.
 - When finished, stop. Do not wait for more instructions.
 `;
 
-    const escapedPrompt = prompt.replace(/"/g, '\\"').replace(/\r?\n/g, " ");
+  const escapedPrompt = prompt.replace(/"/g, '\\"').replace(/\r?\n/g, " ");
 
-    run(`codex exec "${escapedPrompt}"`);
+  run(`codex exec "${escapedPrompt}"`);
 
-    const status = output("git status --short");
+  const status = output("git status --short");
 
-    if (!status) {
-      console.log("No file changes made. Moving issue back to Todo.");
-      await moveIssue(issue.id, "Todo");
-      continue;
-    }
-
-    run("git add .");
-    run(`git commit -m "${issue.identifier} ${issue.title.replace(/"/g, "")}"`);
-    run("git push --set-upstream origin HEAD");
-
-    await moveIssue(issue.id, "Done");
-
-    console.log(`Finished ${issue.identifier}`);
+  if (!status) {
+    console.log("No file changes made. Moving issue back to Todo.");
+    await moveIssue(issue.id, "Todo");
+    await sleep(30000);
+    return;
   }
 
-  console.log(`Reached MAX_TASKS=${MAX_TASKS}.`);
+  run("git add .");
+  run(`git commit -m "${issue.identifier} ${issue.title.replace(/"/g, "")}"`);
+  run("git push");
+
+  await moveIssue(issue.id, "Done");
+
+  console.log(`Finished ${issue.identifier}`);
 }
 
 (async function runner() {
   while (true) {
     try {
-      await main();
+      await processOneIssue();
     } catch (err) {
       console.error("AGENT ERROR:");
       console.error(err.message);
+      console.log("Waiting 30 seconds before retry...");
+      await sleep(30000);
     }
-
-    console.log("Restarting loop in 15 seconds...");
-    await sleep(15000);
   }
 })();
