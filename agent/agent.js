@@ -54,20 +54,22 @@ async function getNextIssue() {
           team: { key: { eq: "${TEAM_KEY}" } },
           state: { type: { eq: "unstarted" } }
         },
-        orderBy: number,
-        first: 1
+        first: 25
       ) {
         nodes {
           id
           identifier
           title
           description
+          number
         }
       }
     }
   `);
 
-  return data.issues.nodes[0];
+  const sorted = data.issues.nodes.sort((a, b) => a.number - b.number);
+
+  return sorted[0];
 }
 
 async function getStateId(name) {
