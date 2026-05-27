@@ -4,19 +4,32 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useParams } from 'react-router-dom';
 import { routeToStatus } from '../../routes/routeMap';
+import { parseNaturalLanguageTask } from '../../lib/naturalLanguageParser';
 import { useTaskStore } from '../../stores/taskStore';
 import { useUiStore } from '../../stores/uiStore';
 
 export function QuickAddButton() {
   const params = useParams();
   const addTask = useTaskStore((state) => state.addTask);
+  const updateTask = useTaskStore((state) => state.updateTask);
   const quickAddOpen = useUiStore((state) => state.quickAddOpen);
   const setQuickAddOpen = useUiStore((state) => state.setQuickAddOpen);
   const [title, setTitle] = useState('');
   const status = routeToStatus(params.status);
 
   const create = () => {
-    const task = addTask(title.trim() || 'New task', status);
+    const parsed = parseNaturalLanguageTask(title.trim() || 'New task', status);
+    const task = addTask(parsed.title, parsed.status);
+    updateTask(
+      task.id,
+      {
+        dueDate: parsed.dueDate,
+        priority: parsed.priority,
+        tags: parsed.tags,
+        description: parsed.dueTime ? `Due at ${parsed.dueTime}` : task.description,
+      },
+      'Created with natural language quick add',
+    );
     toast.success(`Created ${task.title}`);
     setTitle('');
     setQuickAddOpen(false);
@@ -43,7 +56,7 @@ export function QuickAddButton() {
                 if (event.key === 'Enter') create();
                 if (event.key === 'Escape') setQuickAddOpen(false);
               }}
-              placeholder="Task title"
+              placeholder="Call Mike tomorrow at 3pm high priority #client"
               className="h-12 w-full rounded-xl border border-white/10 bg-black/25 px-3 text-sm text-white outline-none placeholder:text-slate-500 focus:border-ion/40"
             />
           </motion.div>

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ThemeMode = 'dark' | 'dim';
+type ThemeMode = 'dark' | 'light';
 
 interface UiState {
   commandOpen: boolean;
@@ -17,7 +17,7 @@ interface UiState {
 function getInitialTheme(): ThemeMode {
   try {
     const savedTheme = localStorage.getItem('brainflow-theme');
-    return savedTheme === 'dim' ? 'dim' : 'dark';
+    return savedTheme === 'light' ? 'light' : 'dark';
   } catch {
     return 'dark';
   }
@@ -32,5 +32,5 @@ export const useUiStore = create<UiState>((set) => ({
   setDetailsOpen: (open) => set({ detailsOpen: open }),
   setQuickAddOpen: (open) => set({ quickAddOpen: open }),
   toggleCommand: () => set((state) => ({ commandOpen: !state.commandOpen })),
-  toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'dim' : 'dark' })),
+  toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'light' : 'dark' })),
 }));

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
+import { useOverlayStore } from '../stores/overlayStore';
 import { useTaskStore } from '../stores/taskStore';
 import { useUiStore } from '../stores/uiStore';
 
@@ -10,6 +11,7 @@ export function useKeyboardShortcuts() {
   const setCommandOpen = useUiStore((state) => state.setCommandOpen);
   const setDetailsOpen = useUiStore((state) => state.setDetailsOpen);
   const setQuickAddOpen = useUiStore((state) => state.setQuickAddOpen);
+  const closeAllOverlays = useOverlayStore((state) => state.closeAllOverlays);
   const addTask = useTaskStore((state) => state.addTask);
   const selectTask = useTaskStore((state) => state.selectTask);
   const focusTask = useTaskStore((state) => state.focusTask);
@@ -30,6 +32,7 @@ export function useKeyboardShortcuts() {
         setCommandOpen(false);
         setDetailsOpen(false);
         setQuickAddOpen(false);
+        closeAllOverlays();
         clearSelection();
       }
 
@@ -65,8 +68,8 @@ export function useKeyboardShortcuts() {
         if (next) focusTask(next.id);
       }
 
-      if (!isTyping && event.altKey && event.key >= '1' && event.key <= '4') {
-        const paths = ['/inbox', '/today', '/upcoming', '/in-progress'];
+      if (!isTyping && event.key >= '1' && event.key <= '4') {
+        const paths = ['/inbox', '/today', '/upcoming', '/completed'];
         navigate(paths[Number(event.key) - 1]);
       }
 
@@ -78,5 +81,5 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [addTask, clearSelection, focusTask, navigate, selectTask, setCommandOpen, setDetailsOpen, setQuickAddOpen, toggleCommand, updateTaskStatus]);
+  }, [addTask, clearSelection, closeAllOverlays, focusTask, navigate, selectTask, setCommandOpen, setDetailsOpen, setQuickAddOpen, toggleCommand, updateTaskStatus]);
 }

@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppShell } from './components/layout/AppShell';
 import { CommandPalette } from './components/command/CommandPalette';
+import { OverlayManager } from './components/command/OverlayManager';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 import { useTaskSync } from './hooks/useTaskSync';
 import { useTheme } from './hooks/useTheme';
@@ -20,6 +21,7 @@ export default function App() {
         </Route>
       </Routes>
       <CommandPalette />
+      <OverlayManager />
     </>
   );
 }

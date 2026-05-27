@@ -63,11 +63,14 @@ interface TaskState {
   setFilter: <K extends keyof TaskFilters>(key: K, value: TaskFilters[K]) => void;
   resetFilters: () => void;
   addTask: (title: string, status?: TaskStatus) => Task;
+  addProject: (name: string) => SharedProject;
+  addTagToFocusedTask: (tagName: string) => void;
   updateTask: (taskId: string, patch: Partial<Task>, activityDetail?: string) => void;
   deleteTask: (taskId: string) => void;
   updateTaskStatus: (taskId: string, status: TaskStatus) => void;
   moveTask: (taskId: string, status: TaskStatus, beforeTaskId?: string | null) => void;
   bulkUpdateStatus: (status: TaskStatus) => void;
+  clearCompleted: () => void;
   bulkDelete: () => void;
   addSubtask: (taskId: string, title: string) => void;
   toggleSubtask: (taskId: string, subtaskId: string) => void;
@@ -187,6 +190,32 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     persistOptimistically(task, 'Created task');
     return task;
   },
+  addProject: (name) => {
+    const project: SharedProject = {
+      id: crypto.randomUUID(),
+      workspaceId: get().selectedWorkspaceId,
+      name: name.trim() || 'New project',
+      description: '',
+      visibility: 'Workspace',
+      ownerId: currentUserId,
+      followerIds: [currentUserId],
+      taskIds: [],
+      updatedAt: now(),
+    };
+    set((state) => ({ projects: [project, ...state.projects] }));
+    return project;
+  },
+  addTagToFocusedTask: (tagName) => {
+    const name = tagName.replace(/^#/, '').trim().toLowerCase();
+    const taskId = get().focusedTaskId || get().selectedTaskId;
+    if (!name || !taskId) return;
+    const state = get();
+    const existingTag = state.tags.find((tag) => tag.name.toLowerCase() === name);
+    const tag = existingTag ?? { id: crypto.randomUUID(), workspaceId: state.selectedWorkspaceId, name, color: '#7dd3fc', createdAt: now() };
+    if (!existingTag) set((current) => ({ tags: [tag, ...current.tags] }));
+    const task = state.tasks.find((item) => item.id === taskId);
+    if (task && !task.tags.includes(name)) get().updateTask(taskId, { tags: [...task.tags, name] }, `Added #${name}`);
+  },
   updateTask: (taskId, patch, activityDetail) =>
     set((state) => {
       let updatedTask: Task | null = null;
@@ -250,6 +279,11 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     const ids = get().selectedTaskIds;
     ids.forEach((id) => get().updateTaskStatus(id, status));
     set({ selectedTaskIds: [] });
+  },
+  clearCompleted: () => {
+    get()
+      .tasks.filter((task) => task.status === 'Completed')
+      .forEach((task) => get().deleteTask(task.id));
   },
   bulkDelete: () => {
     const ids = get().selectedTaskIds;
