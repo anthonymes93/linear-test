@@ -17,11 +17,16 @@ export interface Attachment {
 
 export interface Task {
   id: string;
+  workspaceId: string;
+  projectId: string | null;
+  spaceType: 'Personal' | 'Team';
   title: string;
   description: string;
   priority: TaskPriority;
   status: TaskStatus;
   dueDate: string | null;
+  assigneeIds: string[];
+  watcherIds: string[];
   tags: string[];
   subtasks: Subtask[];
   notes: string[];

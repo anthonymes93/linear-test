@@ -9,9 +9,10 @@ import { TaskCard } from './TaskCard';
 export function TaskFeed() {
   const params = useParams();
   const tasks = useTaskStore((state) => state.tasks);
+  const selectedWorkspaceId = useTaskStore((state) => state.selectedWorkspaceId);
   const isLoading = useTaskStore((state) => state.isLoading);
   const status = routeToStatus(params.status);
-  const filteredTasks = useMemo(() => tasks.filter((task) => task.status === status), [status, tasks]);
+  const filteredTasks = useMemo(() => tasks.filter((task) => task.status === status && task.workspaceId === selectedWorkspaceId), [selectedWorkspaceId, status, tasks]);
 
   if (isLoading) {
     return <div className="p-6 text-sm text-slate-500">Loading task stream...</div>;

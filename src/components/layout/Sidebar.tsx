@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { Archive, CalendarClock, CheckCircle2, CircleDot, Clock3, Inbox, Loader2, PauseCircle } from 'lucide-react';
 import { cn } from '../../lib/cn';
 import type { TaskStatus } from '../../types/task';
+import { WorkspaceSwitcher } from '../collaboration/WorkspaceSwitcher';
 
 const navItems: Array<{ label: TaskStatus; path: string; icon: typeof Inbox }> = [
   { label: 'Inbox', path: '/inbox', icon: Inbox },
@@ -24,6 +25,10 @@ export function Sidebar() {
           <p className="text-sm font-semibold tracking-wide text-white">BrainFlow</p>
           <p className="text-xs text-slate-500">Realtime workspace</p>
         </div>
+      </div>
+
+      <div className="mb-6">
+        <WorkspaceSwitcher />
       </div>
 
       <nav className="space-y-1">
