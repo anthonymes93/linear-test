@@ -1,5 +1,6 @@
 require("dotenv").config();
 const axios = require("axios");
+const fs = require("fs");
 const { execSync } = require("child_process");
 
 const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
@@ -11,7 +12,12 @@ function sleep(ms) {
 
 function run(cmd, cwd = "..") {
   console.log(`\n> ${cmd}`);
-  execSync(cmd, { stdio: "inherit", cwd, shell: "powershell.exe" });
+
+  execSync(cmd, {
+    stdio: "inherit",
+    cwd,
+    shell: "powershell.exe",
+  });
 }
 
 function output(cmd, cwd = "..") {
@@ -93,7 +99,10 @@ async function moveIssue(issueId, stateName) {
 
   await linear(`
     mutation {
-      issueUpdate(id: "${issueId}", input: { stateId: "${stateId}" }) {
+      issueUpdate(
+        id: "${issueId}",
+        input: { stateId: "${stateId}" }
+      ) {
         success
       }
     }
@@ -124,8 +133,11 @@ async function processOneIssue() {
     console.log("Dirty working tree detected before Codex:");
     console.log(dirtyBefore);
     console.log("Moving issue back to Todo and waiting.");
+
     await moveIssue(issue.id, "Todo");
+
     await sleep(30000);
+
     return;
   }
 
@@ -147,18 +159,28 @@ Rules:
 - When finished, stop. Do not wait for more instructions.
 `;
 
-const escapedPrompt = prompt.replace(/\r?\n/g, " ");
-run(`codex exec -- '${escapedPrompt}'`);  const status = output("git status --short");
+  fs.writeFileSync("../codex-prompt.txt", prompt, "utf8");
+
+  run(`codex exec -- "$(Get-Content -Raw codex-prompt.txt)"`);
+
+  const status = output("git status --short");
 
   if (!status) {
     console.log("No file changes made. Moving issue back to Todo.");
+
     await moveIssue(issue.id, "Todo");
+
     await sleep(30000);
+
     return;
   }
 
   run("git add .");
-  run(`git commit -m "${issue.identifier} ${issue.title.replace(/"/g, "")}"`);
+
+  run(
+    `git commit -m "${issue.identifier} ${issue.title.replace(/"/g, "")}"`
+  );
+
   run("git push");
 
   await moveIssue(issue.id, "Done");
@@ -173,7 +195,9 @@ run(`codex exec -- '${escapedPrompt}'`);  const status = output("git status --sh
     } catch (err) {
       console.error("AGENT ERROR:");
       console.error(err.message);
+
       console.log("Waiting 30 seconds before retry...");
+
       await sleep(30000);
     }
   }
