@@ -167,8 +167,9 @@ Rules:
 - When finished, stop. Do not wait for more instructions.
 `;
 
-execFileSync("cmd.exe", ["/c", "codex", "exec", prompt], {
-  stdio: "inherit",
+execFileSync("cmd.exe", ["/c", "codex", "exec", "-"], {
+  input: prompt,
+  stdio: ["pipe", "inherit", "inherit"],
   cwd: "..",
 });
 
