@@ -8,6 +8,8 @@ export function Dashboard() {
   const params = useParams();
   const status = routeToStatus(params.status);
   const isLoading = useTaskStore((state) => state.isLoading);
+  const syncMode = useTaskStore((state) => state.syncMode);
+  const syncError = useTaskStore((state) => state.syncError);
 
   return (
     <section className="min-h-0 flex-1 overflow-y-auto">
@@ -18,7 +20,13 @@ export function Dashboard() {
             <h1 className="mt-2 text-2xl font-semibold text-white sm:text-3xl">{status}</h1>
           </div>
           <div className="hidden gap-2 sm:flex">
-            {isLoading ? <Skeleton className="h-8 w-24" /> : <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-slate-400">Live-ready</span>}
+            {isLoading ? (
+              <Skeleton className="h-8 w-24" />
+            ) : (
+              <span className="rounded-full border border-white/10 bg-white/[0.06] px-3 py-2 text-xs text-slate-400">
+                {syncError ? 'Sync offline' : syncMode === 'realtime' ? 'Live sync' : 'Mock data'}
+              </span>
+            )}
           </div>
         </div>
       </div>

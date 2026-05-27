@@ -1,22 +1,52 @@
-import { addDoc, collection, onSnapshot, orderBy, query, serverTimestamp, type Unsubscribe } from 'firebase/firestore';
+import { collection, doc, onSnapshot, orderBy, query, serverTimestamp, setDoc, type DocumentData, type Unsubscribe } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import type { Task } from '../types/task';
 
-const tasksCollection = collection(db, 'tasks');
+const noopUnsubscribe: Unsubscribe = () => undefined;
 
-export function subscribeToTasks(onTasks: (tasks: Task[]) => void): Unsubscribe {
-  const taskQuery = query(tasksCollection, orderBy('updatedAt', 'desc'));
-
-  return onSnapshot(taskQuery, (snapshot) => {
-    const tasks = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }) as Task);
-    onTasks(tasks);
-  });
+function toIsoDate(value: unknown): string | null {
+  if (!value) return null;
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && 'toDate' in value && typeof value.toDate === 'function') {
+    return value.toDate().toISOString();
+  }
+  return null;
 }
 
-export async function createTaskDocument(task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) {
-  return addDoc(tasksCollection, {
+function fromDocument(id: string, data: DocumentData): Task {
+  return {
+    ...(data as Omit<Task, 'id'>),
+    id,
+    createdAt: toIsoDate(data.createdAt) ?? new Date().toISOString(),
+    updatedAt: toIsoDate(data.updatedAt) ?? new Date().toISOString(),
+    completedAt: toIsoDate(data.completedAt),
+  };
+}
+
+export function subscribeToTasks(onTasks: (tasks: Task[]) => void, onError?: (error: Error) => void): Unsubscribe {
+  if (!db) return noopUnsubscribe;
+
+  const tasksCollection = collection(db, 'tasks');
+  const taskQuery = query(tasksCollection, orderBy('updatedAt', 'desc'));
+
+  return onSnapshot(
+    taskQuery,
+    (snapshot) => {
+      const tasks = snapshot.docs.map((item) => fromDocument(item.id, item.data()));
+      onTasks(tasks);
+    },
+    (error) => onError?.(error),
+  );
+}
+
+export async function persistTask(task: Task) {
+  if (!db) return;
+
+  const taskRef = doc(db, 'tasks', task.id);
+
+  await setDoc(taskRef, {
     ...task,
-    createdAt: serverTimestamp(),
+    createdAt: task.createdAt || serverTimestamp(),
     updatedAt: serverTimestamp(),
-  });
+  }, { merge: true });
 }
