@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import { Inbox, Plus, Search } from 'lucide-react';
+import { CheckCircle2, Inbox, Plus, Search, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
@@ -19,6 +19,9 @@ export function CommandPalette() {
   const open = useUiStore((state) => state.commandOpen);
   const setOpen = useUiStore((state) => state.setCommandOpen);
   const addTask = useTaskStore((state) => state.addTask);
+  const selectedCount = useTaskStore((state) => state.selectedTaskIds.length);
+  const bulkUpdateStatus = useTaskStore((state) => state.bulkUpdateStatus);
+  const bulkDelete = useTaskStore((state) => state.bulkDelete);
 
   const createTask = () => {
     const title = query.trim() || 'New task';
@@ -72,6 +75,30 @@ export function CommandPalette() {
                     Jump to {destination.label}
                   </button>
                 ))}
+                {selectedCount > 0 && (
+                  <>
+                    <button
+                      onClick={() => {
+                        bulkUpdateStatus('Completed');
+                        setOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-slate-300 transition hover:bg-white/[0.08]"
+                    >
+                      <CheckCircle2 className="h-4 w-4 text-ion" />
+                      Complete {selectedCount} selected
+                    </button>
+                    <button
+                      onClick={() => {
+                        bulkDelete();
+                        setOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-left text-sm text-rose-200 transition hover:bg-rose-500/10"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      Delete {selectedCount} selected
+                    </button>
+                  </>
+                )}
               </div>
             </motion.div>
           </div>

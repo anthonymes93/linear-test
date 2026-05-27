@@ -4,8 +4,12 @@ type ThemeMode = 'dark' | 'dim';
 
 interface UiState {
   commandOpen: boolean;
+  detailsOpen: boolean;
+  quickAddOpen: boolean;
   theme: ThemeMode;
   setCommandOpen: (open: boolean) => void;
+  setDetailsOpen: (open: boolean) => void;
+  setQuickAddOpen: (open: boolean) => void;
   toggleCommand: () => void;
   toggleTheme: () => void;
 }
@@ -21,8 +25,12 @@ function getInitialTheme(): ThemeMode {
 
 export const useUiStore = create<UiState>((set) => ({
   commandOpen: false,
+  detailsOpen: true,
+  quickAddOpen: false,
   theme: getInitialTheme(),
   setCommandOpen: (open) => set({ commandOpen: open }),
+  setDetailsOpen: (open) => set({ detailsOpen: open }),
+  setQuickAddOpen: (open) => set({ quickAddOpen: open }),
   toggleCommand: () => set((state) => ({ commandOpen: !state.commandOpen })),
   toggleTheme: () => set((state) => ({ theme: state.theme === 'dark' ? 'dim' : 'dark' })),
 }));
