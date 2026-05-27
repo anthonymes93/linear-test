@@ -190,8 +190,21 @@ execFileSync("cmd.exe", ["/c", "codex", "exec", "-"], {
   run(`git commit -m "${issue.identifier} ${issue.title.replace(/"/g, "")}"`);
   run("git push");
 
-  await moveIssue(issue.id, "Done");
+for (let attempt = 1; attempt <= 5; attempt++) {
+  try {
+    await moveIssue(issue.id, "Done");
+    break;
+  } catch (err) {
+    console.error(`Failed to move issue to Done. Attempt ${attempt}/5`);
+    console.error(err.message);
 
+    if (attempt === 5) {
+      throw err;
+    }
+
+    await sleep(5000);
+  }
+}
   console.log(`Finished ${issue.identifier}`);
 }
 
