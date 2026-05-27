@@ -1,8 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
 const fs = require("fs");
-const { execSync } = require("child_process");
-
+const { execSync, execFileSync } = require("child_process");
 const LINEAR_API_KEY = process.env.LINEAR_API_KEY;
 const TEAM_KEY = process.env.LINEAR_TEAM_KEY;
 
@@ -161,8 +160,11 @@ Rules:
 
   fs.writeFileSync("../codex-prompt.txt", prompt, "utf8");
 
-  run(`codex exec -- "$(Get-Content -Raw codex-prompt.txt)"`);
-
+execFileSync("codex", ["exec", prompt], {
+  stdio: "inherit",
+  cwd: "..",
+  shell: false,
+});
   const status = output("git status --short");
 
   if (!status) {
