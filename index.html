@@ -1,121 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Linear Test</title>
   <style>
-    :root {
-      --background: #fffef5;
-      --text: #2b2500;
-      --menu: #ffd400;
-      --heading: #8a6d00;
-      --control: #ffffff;
-      --control-border: #777;
-    }
-
-    [data-theme="light"] {
-      --background: #ffffff;
-      --text: #222222;
-      --menu: #eeeeee;
-      --heading: #333333;
-      --control: #ffffff;
-      --control-border: #777777;
-    }
-
-    [data-theme="dark"] {
-      --background: #181818;
-      --text: #f2f2f2;
-      --menu: #2d2d2d;
-      --heading: #ffffff;
-      --control: #252525;
-      --control-border: #888888;
-    }
-
-    [data-theme="pink"] {
-      --background: #fff2f8;
-      --text: #3a1024;
-      --menu: #ff8fc1;
-      --heading: #9b1b57;
-      --control: #ffffff;
-      --control-border: #c74f86;
-    }
-
     body {
       margin: 0;
-      padding-left: 96px;
-      background: var(--background);
-      color: var(--text);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
       font-family: Arial, sans-serif;
+      background: #f6f7f9;
     }
 
-    .menu-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 80px;
-      height: 100vh;
-      background: var(--menu);
-    }
-
-    .theme-switcher {
-      margin-top: 16px;
-    }
-
-    h1 {
-      color: var(--heading);
-    }
-
-    button,
-    select {
-      background: var(--control);
-      color: var(--text);
-      border: 1px solid var(--control-border);
-      padding: 6px 10px;
-    }
-
-    dialog {
-      background: var(--background);
-      color: var(--text);
-      border: 1px solid var(--control-border);
-      padding: 24px;
+    button {
+      padding: 10px 16px;
+      font: inherit;
+      border: 1px solid #9aa0a6;
+      border-radius: 6px;
+      background: #ffffff;
+      color: #202124;
+      cursor: pointer;
     }
   </style>
 </head>
-<body data-theme="yellow">
-  <nav class="menu-bar" aria-label="Main menu"></nav>
-  <label class="theme-switcher" for="theme-select">Theme</label>
-  <select id="theme-select">
-    <option value="light">Light mode</option>
-    <option value="dark">Dark mode</option>
-    <option value="yellow" selected>Yellow</option>
-    <option value="pink">Pink</option>
-  </select>
-  <h1>yesssssssssss</h1>
-  <button>Hello World</button>
-  <button>Hello Yo</button>
-  <button id="ok-button">okkkkkkkk</button>
+<body>
+  <div id="root"></div>
 
-  <dialog id="ok-modal">
-    <p>lorium ipsum</p>
-    <button id="close-modal">Close</button>
-  </dialog>
-
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script>
-    const okButton = document.getElementById('ok-button');
-    const okModal = document.getElementById('ok-modal');
-    const closeModal = document.getElementById('close-modal');
-    const themeSelect = document.getElementById('theme-select');
+    function App() {
+      return React.createElement('button', null, 'almost!');
+    }
 
-    themeSelect.addEventListener('change', () => {
-      document.body.dataset.theme = themeSelect.value;
-    });
-
-    okButton.addEventListener('click', () => {
-      okModal.showModal();
-    });
-
-    closeModal.addEventListener('click', () => {
-      okModal.close();
-    });
+    ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
   </script>
 </body>
 </html>
